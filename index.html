@@ -1,0 +1,2516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Genium - Pizarrón de Ideas</title>
+
+  <!-- (Opcional, solo visual) Fuente Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #059669;
+      --primary-dark: #047857;
+      --secondary: #10b981;
+      --accent: #06b6d4;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --light: #f8fafc;
+      --dark: #1e293b;
+      --gray: #64748b;
+      --gray-light: #e2e8f0;
+      --gradient-primary: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      --gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #059669 100%);
+      --gradient-accent: linear-gradient(135deg, #d97706 0%, #dc2626 100%);
+      --gradient-light: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      --gradient-card: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --radius: 8px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+    }
+
+    body {
+      background: var(--gradient-light);
+      color: var(--dark);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 300px;
+      background: var(--gradient-card);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .logo {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-bottom: 1px solid var(--gray-light);
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .logo img {
+      max-width: 150px;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    .logo h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .tools {
+      padding: 20px;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .tool-group {
+      margin-bottom: 28px;
+    }
+
+    .tool-group h3 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .tool-btn {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border: none;
+      background: var(--gradient-card);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--dark);
+      font-weight: 500;
+      box-shadow: var(--shadow);
+    }
+
+    .tool-btn:hover {
+      background: var(--gradient-primary);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .tool-btn.active {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .tool-btn i {
+      margin-right: 12px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .color-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .color-option {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+    }
+
+    .color-option:hover {
+      transform: scale(1.1);
+    }
+
+    .color-option.active {
+      border-color: var(--dark);
+      transform: scale(1.1);
+    }
+
+    .user-section {
+      padding: 20px;
+      border-top: 1px solid var(--gray-light);
+      display: flex;
+      align-items: center;
+      background: var(--gradient-card);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .user-section:hover {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .user-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 12px;
+      font-size: 1.1rem;
+      box-shadow: var(--shadow);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 28px;
+      background: var(--gradient-card);
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .board-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .board-info h2 {
+      font-size: 1.4rem;
+      color: var(--dark);
+      font-weight: 600;
+    }
+
+    .edit-board-name {
+      background: none;
+      border: none;
+      color: var(--primary);
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 4px;
+      transition: var(--transition);
+    }
+
+    .edit-board-name:hover {
+      background: var(--gray-light);
+    }
+
+    .board-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .action-btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .action-btn i {
+      margin-right: 8px;
+    }
+
+    .primary-btn {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .secondary-btn {
+      background: var(--gradient-card);
+      color: var(--dark);
+      border: 1px solid var(--gray-light);
+    }
+
+    /* Tabs */
+    .tabs-container {
+      background: var(--gradient-card);
+      border-bottom: 1px solid var(--gray-light);
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      overflow-x: auto;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 5px;
+      padding: 10px 0;
+    }
+
+    .tab {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      background: var(--gradient-light);
+      border-radius: var(--radius) var(--radius) 0 0;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid transparent;
+      border-bottom: none;
+      white-space: nowrap;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: var(--shadow);
+    }
+
+    .tab.active {
+      background: var(--gradient-card);
+      border-color: var(--gray-light);
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .tab:hover:not(.active) {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .tab-close {
+      margin-left: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--gray);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tab-close:hover {
+      background: var(--gray-light);
+      color: var(--danger);
+    }
+
+    .add-tab {
+      background: var(--gradient-primary);
+      border: none;
+      font-size: 1.2rem;
+      color: white;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: var(--radius);
+      margin-left: 10px;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+    }
+
+    .add-tab:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .board-container {
+      flex-grow: 1;
+      padding: 24px;
+      overflow: auto;
+      background: var(--gradient-light);
+      width: 100%;
+    }
+
+    .board {
+      width: 100%;
+      height: 100%;
+      background: var(--gradient-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: auto;
+      min-height: 600px;
+      background-image: linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--gray);
+      text-align: center;
+      padding: 40px;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      color: var(--gray-light);
+    }
+
+    .empty-state h3 {
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+      color: var(--dark);
+    }
+
+    .empty-state p {
+      max-width: 400px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    /* Note Styles */
+.note {
+  position: absolute;
+  width: 260px;                     /* ancho fijo recomendado, ajusta si quieres */
+  min-height: 140px;                /* altura mínima razonable */
+  height: auto;                     /* ¡clave! permite crecer */
+  max-height: none;                 /* quitamos límite superior */
+  padding: 16px 16px 20px 16px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  cursor: move;
+  transition: var(--transition), height 0.3s ease;
+  backdrop-filter: blur(10px);
+  overflow: hidden;                 /* mantenemos para que no desborde visualmente */
+  display: flex;
+  flex-direction: column;
+  touch-action: none;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.note:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+/* Header */
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+/* Título */
+.note-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  margin: 0 0 10px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(0,0,0,0.09);
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Contenido principal */
+.note-content {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: 0.93rem;
+  line-height: 1.58;
+  color: #334155;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  /* Sin height fija → se adapta al texto */
+}
+
+/* Footer */
+.note-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  font-size: 0.78rem;
+  color: #64748b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ---------------------- MODO EXPANDIDO ---------------------- */
+.note.expanded {
+  width: auto !important;           /* permite crecer horizontalmente si es necesario */
+  min-height: 220px;
+  max-height: 70vh;                 /* límite razonable para no tapar toda la pantalla */
+  height: auto;
+  overflow-y: auto;                 /* scroll solo si es MUY largo */
+  padding-bottom: 28px;
+  z-index: 100;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
+.note.expanded .note-title {
+  white-space: normal;              /* permite multilínea en expandido */
+  overflow: visible;
+}
+
+.note.expanded .note-content {
+  max-height: none;
+  overflow: visible;
+  line-height: 1.65;
+}
+
+/* Responsive (móviles) */
+@media (max-width: 768px) {
+  .note {
+    width: 90% !important;
+    max-width: 340px;
+  }
+  .note.expanded {
+    width: 94% !important;
+    max-width: 380px;
+  }
+}
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+      background: var(--gradient-card);
+      width: 500px;
+      max-width: 90vw;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      animation: modalAppear 0.3s ease;
+    }
+
+    @keyframes modalAppear {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      padding: 20px;
+      background: var(--gradient-primary);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      padding: 24px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--gray-light);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      transition: var(--transition);
+      background: var(--gradient-light);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+    }
+
+    .modal-footer {
+      padding: 18px 24px;
+      background: var(--gradient-light);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 16px 24px;
+      background: var(--gradient-primary);
+      color: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast i {
+      font-size: 1.2rem;
+    }
+
+    .toast.success { background: var(--gradient-primary); }
+    .toast.error { background: var(--gradient-accent); }
+
+    /* Import/Export section */
+    .import-export {
+      padding: 20px;
+      border-top: 1px solid var(--gray-light);
+    }
+
+    .import-export-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    /* Share modal */
+    .share-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .share-option {
+      flex: 1;
+      min-width: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      border: 1px solid var(--gray-light);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+      background: var(--gradient-card);
+    }
+
+    .share-option:hover {
+      background: var(--gradient-primary);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .share-option i {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .share-option.email i { color: var(--primary); }
+    .share-option.whatsapp i { color: var(--success); }
+    .share-option.pdf i { color: var(--danger); }
+    .share-option.image i { color: var(--accent); }
+
+    .share-option:hover i { color: white; }
+
+    /* User selection modal */
+    .user-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--gray-light);
+      border-radius: var(--radius);
+      padding: 10px;
+      background: var(--gradient-light);
+    }
+
+    .user-item {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid var(--gray-light);
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--gradient-card);
+      border-radius: var(--radius);
+      margin-bottom: 5px;
+    }
+
+    .user-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .user-item:hover { background: var(--gradient-light); }
+
+    .user-item.selected {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    .user-item-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 12px;
+    }
+
+    .user-item-info { flex-grow: 1; }
+    .user-item-name { font-weight: 600; }
+
+    .user-item-role {
+      font-size: 0.8rem;
+      color: var(--gray);
+    }
+    .user-item.selected .user-item-role { color: rgba(255, 255, 255, 0.8); }
+
+    /* User management modal */
+    .users-container {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border: 1px solid var(--gray-light);
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      background: var(--gradient-card);
+    }
+
+    .user-card-info { flex-grow: 1; }
+    .user-card-name { font-weight: 600; margin-bottom: 5px; }
+
+    .user-card-details {
+      font-size: 0.85rem;
+      color: var(--gray);
+    }
+
+    .user-card-actions { display: flex; gap: 10px; }
+
+    .user-action {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--gray);
+      transition: var(--transition);
+      padding: 5px;
+      border-radius: 4px;
+    }
+
+    .user-action:hover { background: var(--gradient-primary); color: white; }
+    .user-action.delete:hover { background: var(--gradient-accent); color: white; }
+
+    /* Responsive Styles */
+    .menu-toggle {
+      display: none;
+      background: var(--gradient-primary);
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: white;
+      padding: 8px;
+      border-radius: var(--radius);
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+    }
+
+    .menu-toggle:hover { background: var(--primary-dark); }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+    }
+
+    @media (max-width: 1024px) {
+      .sidebar {
+        position: fixed;
+        height: 100%;
+        transform: translateX(-100%);
+        width: 280px;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .menu-toggle { display: block; }
+      .sidebar-overlay.open { display: block; }
+    }
+
+    @media (max-width: 768px) {
+      .top-bar {
+        padding: 16px 20px;
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+      }
+
+      .board-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .action-btn span { display: none; }
+      .action-btn i { margin-right: 0; }
+
+      .board-container { padding: 16px; }
+      .tabs-container { padding: 0 20px; }
+
+      .note { width: 90% !important; max-width: 300px; }
+      .note.expanded { width: 90% !important; max-width: 350px; }
+
+      .modal-content { width: 95vw; }
+      .share-options { flex-direction: column; }
+      .share-option { min-width: auto; }
+    }
+
+    @media (max-width: 480px) {
+      .logo h1 { font-size: 1.5rem; }
+      .board-info h2 { font-size: 1.2rem; }
+      .tool-btn span { font-size: 0.9rem; }
+
+      .note { width: 95% !important; max-width: 280px; }
+      .note.expanded { width: 95% !important; max-width: 320px; }
+
+      .modal-body { padding: 16px; }
+      .modal-footer { padding: 16px; }
+    }
+
+    /* ============================================================
+       PREMIUM THEME OVERRIDE (solo diseño, no cambia funcionalidad)
+       ============================================================ */
+    :root{
+      --primary: #0ea5e9;
+      --primary-dark: #0284c7;
+      --secondary: #14b8a6;
+      --accent: #a78bfa;
+
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger:  #ef4444;
+
+      --light: #f8fafc;
+      --dark:  #0f172a;
+      --gray:  #64748b;
+      --gray-light: rgba(15, 23, 42, 0.10);
+
+      --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #14b8a6 55%, #22c55e 100%);
+      --gradient-secondary: linear-gradient(135deg, #a78bfa 0%, #0ea5e9 65%, #14b8a6 100%);
+      --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+
+      --gradient-light:
+        radial-gradient(1100px 520px at 10% 0%, rgba(14,165,233,.16), transparent 55%),
+        radial-gradient(900px 520px at 95% 22%, rgba(167,139,250,.14), transparent 60%),
+        radial-gradient(900px 520px at 40% 110%, rgba(20,184,166,.10), transparent 65%),
+        linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+
+      --gradient-card: linear-gradient(180deg, rgba(255,255,255,.86) 0%, rgba(255,255,255,.68) 100%);
+
+      --shadow: 0 1px 2px rgba(2,6,23,.05), 0 10px 30px rgba(2,6,23,.08);
+      --shadow-lg: 0 12px 35px rgba(2,6,23,.14), 0 30px 80px rgba(2,6,23,.12);
+
+      --radius: 14px;
+      --transition: all 220ms cubic-bezier(.2,.8,.2,1);
+    }
+
+    html, body { height: 100%; }
+    body{
+      background: var(--gradient-light);
+      background-attachment: fixed;
+      color: var(--dark);
+    }
+    *{ -webkit-tap-highlight-color: transparent; }
+    ::selection{ background: rgba(14,165,233,.22); }
+
+    *::-webkit-scrollbar{ width: 10px; height: 10px; }
+    *::-webkit-scrollbar-track{ background: rgba(15,23,42,.06); border-radius: 999px; }
+    *::-webkit-scrollbar-thumb{
+      background: rgba(15,23,42,.18);
+      border-radius: 999px;
+      border: 2px solid rgba(255,255,255,.55);
+    }
+    *::-webkit-scrollbar-thumb:hover{ background: rgba(15,23,42,.28); }
+
+    .sidebar,
+    .top-bar,
+    .tabs-container,
+    .modal-content{
+      background: rgba(255,255,255,.62);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,.55);
+    }
+
+    .sidebar{
+      border-right: 1px solid rgba(15,23,42,.10);
+      box-shadow: var(--shadow-lg);
+    }
+    .logo{
+      position: relative;
+      background: var(--gradient-primary);
+      border-bottom: 1px solid rgba(255,255,255,.22);
+    }
+    .logo::after{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(600px 120px at 50% 0%, rgba(255,255,255,.35), transparent 55%);
+      pointer-events:none;
+    }
+    .logo img{ filter: drop-shadow(0 10px 18px rgba(2,6,23,.25)); }
+    .logo h1{ letter-spacing: .3px; }
+
+    .tool-btn,
+    .action-btn,
+    .share-option,
+    .user-item,
+    .user-card{
+      border: 1px solid rgba(15,23,42,.10);
+    }
+    .tool-btn,
+    .action-btn{
+      background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.58));
+    }
+    .tool-btn:hover,
+    .action-btn:hover{
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    .tool-btn:hover{ background: var(--gradient-secondary); }
+    .tool-btn.active{ background: var(--gradient-primary); }
+
+    .primary-btn{
+      background: var(--gradient-primary);
+      position: relative;
+      overflow: hidden;
+    }
+    .primary-btn::after{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(600px 120px at 20% 0%, rgba(255,255,255,.40), transparent 55%);
+      pointer-events:none;
+    }
+    .secondary-btn{
+      background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.54));
+    }
+
+    .tool-btn:focus-visible,
+    .action-btn:focus-visible,
+    .form-control:focus-visible,
+    .tab:focus-visible,
+    .add-tab:focus-visible{
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(14,165,233,.18), var(--shadow);
+      border-color: rgba(14,165,233,.35);
+    }
+
+    .top-bar{ border-bottom: 1px solid rgba(15,23,42,.08); }
+    .board-info h2{ font-weight: 700; letter-spacing: .2px; }
+
+    .edit-board-name{
+      border: 1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.55);
+      padding: 8px;
+      border-radius: 10px;
+      box-shadow: 0 1px 1px rgba(2,6,23,.04);
+    }
+    .edit-board-name:hover{ background: rgba(14,165,233,.10); }
+
+    .tabs-container{ border-bottom: 1px solid rgba(15,23,42,.08); }
+    .tab{
+      background: rgba(255,255,255,.55);
+      border: 1px solid rgba(15,23,42,.10);
+      box-shadow: 0 1px 1px rgba(2,6,23,.04);
+    }
+    .tab.active{
+      background: rgba(255,255,255,.78);
+      color: var(--primary);
+      box-shadow: var(--shadow);
+    }
+    .tab:hover:not(.active){ background: var(--gradient-secondary); }
+    .add-tab{
+      background: var(--gradient-primary);
+      border: 1px solid rgba(255,255,255,.28);
+    }
+
+    .board-container{ background: transparent; }
+    .board{
+      border: 1px solid rgba(15,23,42,.10);
+      box-shadow: var(--shadow-lg);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.62));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      background-image:
+        radial-gradient(1200px 400px at 10% 0%, rgba(14,165,233,.10), transparent 55%),
+        radial-gradient(900px 400px at 90% 20%, rgba(167,139,250,.10), transparent 60%),
+        linear-gradient(rgba(2,6,23,0.028) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(2,6,23,0.028) 1px, transparent 1px);
+      background-size: auto, auto, 22px 22px, 22px 22px;
+    }
+
+    .empty-state i{ color: rgba(100,116,139,.25); }
+    .empty-state h3{ font-weight: 800; letter-spacing: .2px; }
+
+    .note{
+      border: 1px solid rgba(15,23,42,.12);
+      box-shadow: 0 18px 45px rgba(2,6,23,.18);
+      border-radius: calc(var(--radius) + 2px);
+      background-image: linear-gradient(180deg, rgba(255,255,255,.45), rgba(255,255,255,0));
+    }
+    .note:hover{ transform: translateY(-6px); }
+    .note-title{ font-weight: 800; letter-spacing: .15px; }
+    .note-action{
+      background: rgba(255,255,255,.55);
+      border: 1px solid rgba(255,255,255,.65);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .note-action:hover{ background: rgba(255,255,255,.88); }
+
+    .modal{ background: rgba(2,6,23,.52); }
+    .modal-content{
+      border: 1px solid rgba(255,255,255,.55);
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-header{ background: var(--gradient-primary); }
+    .form-control{
+      background: rgba(255,255,255,.60);
+      border: 1px solid rgba(15,23,42,.12);
+    }
+    .form-control:focus{
+      border-color: rgba(14,165,233,.45);
+      box-shadow: 0 0 0 4px rgba(14,165,233,.18);
+    }
+
+    .share-option,
+    .user-item,
+    .user-card{
+      background: rgba(255,255,255,.62);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .user-item:hover{ background: rgba(14,165,233,.08); }
+    .user-item.selected{
+      background: var(--gradient-primary);
+      border-color: rgba(255,255,255,.30);
+    }
+    .user-section{ border-top: 1px solid rgba(15,23,42,.08); }
+    .user-section:hover{ background: var(--gradient-secondary); }
+
+    .toast{
+      border: 1px solid rgba(255,255,255,.22);
+      box-shadow: var(--shadow-lg);
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *{ transition: none !important; animation: none !important; }
+    }
+
+    /* ============================================================
+       SOFT DARK MODE (no tan negro) - solo diseño
+       Se activa automáticamente con el sistema
+       ============================================================ */
+    @media (prefers-color-scheme: dark) {
+      :root{
+        --dark: #e5e7eb;
+        --light: #0b1220;
+
+        --gray: #a7b0bf;
+        --gray-light: rgba(148,163,184,.18);
+
+        --primary: #38bdf8;
+        --primary-dark: #0ea5e9;
+        --secondary: #2dd4bf;
+        --accent: #a78bfa;
+
+        --gradient-light:
+          radial-gradient(1100px 520px at 10% 0%, rgba(56,189,248,.16), transparent 55%),
+          radial-gradient(900px 520px at 95% 22%, rgba(167,139,250,.14), transparent 60%),
+          radial-gradient(900px 520px at 40% 110%, rgba(45,212,191,.12), transparent 65%),
+          linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
+
+        --gradient-card: linear-gradient(180deg, rgba(15,23,42,.78) 0%, rgba(15,23,42,.58) 100%);
+
+        --shadow: 0 1px 2px rgba(0,0,0,.35), 0 12px 34px rgba(0,0,0,.22);
+        --shadow-lg: 0 18px 55px rgba(0,0,0,.30), 0 40px 120px rgba(0,0,0,.24);
+      }
+
+      body{
+        background: var(--gradient-light);
+        color: #e5e7eb;
+      }
+
+      *::-webkit-scrollbar-track{ background: rgba(148,163,184,.10); }
+      *::-webkit-scrollbar-thumb{
+        background: rgba(148,163,184,.26);
+        border: 2px solid rgba(15,23,42,.65);
+      }
+      *::-webkit-scrollbar-thumb:hover{ background: rgba(148,163,184,.38); }
+
+      .sidebar,
+      .top-bar,
+      .tabs-container,
+      .modal-content{
+        background: rgba(15,23,42,.66);
+        border: 1px solid rgba(148,163,184,.16);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .tool-group h3{ color: rgba(229,231,235,.70); }
+      .board-info h2{ color: rgba(229,231,235,.92); }
+
+      .tool-btn,
+      .action-btn{
+        color: rgba(229,231,235,.92);
+        border: 1px solid rgba(148,163,184,.14);
+        background: linear-gradient(180deg, rgba(15,23,42,.72), rgba(15,23,42,.52));
+      }
+      .tool-btn:hover{ color: white; }
+
+      .secondary-btn{
+        color: rgba(229,231,235,.92);
+        background: linear-gradient(180deg, rgba(15,23,42,.70), rgba(15,23,42,.48));
+        border: 1px solid rgba(148,163,184,.18);
+      }
+
+      .tab{
+        color: rgba(229,231,235,.88);
+        background: rgba(15,23,42,.54);
+        border: 1px solid rgba(148,163,184,.16);
+      }
+      .tab.active{
+        background: rgba(15,23,42,.78);
+        color: var(--primary);
+      }
+      .tab-close{ color: rgba(229,231,235,.65); }
+      .tab-close:hover{ background: rgba(148,163,184,.14); }
+
+      .board{
+        border: 1px solid rgba(148,163,184,.16);
+        background: linear-gradient(180deg, rgba(15,23,42,.74), rgba(15,23,42,.52));
+        background-image:
+          radial-gradient(1200px 420px at 10% 0%, rgba(56,189,248,.10), transparent 55%),
+          radial-gradient(900px 420px at 90% 20%, rgba(167,139,250,.10), transparent 60%),
+          linear-gradient(rgba(148,163,184,0.10) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(148,163,184,0.10) 1px, transparent 1px);
+        background-size: auto, auto, 22px 22px, 22px 22px;
+      }
+
+      .empty-state{ color: rgba(229,231,235,.72); }
+      .empty-state h3{ color: rgba(229,231,235,.92); }
+      .empty-state i{ color: rgba(148,163,184,.28); }
+
+      .modal{ background: rgba(2,6,23,.62); }
+      .modal-body, .modal-footer{ color: rgba(229,231,235,.90); }
+      .form-control{
+        color: rgba(229,231,235,.92);
+        background: rgba(15,23,42,.62);
+        border: 1px solid rgba(148,163,184,.18);
+      }
+      .form-group label{ color: rgba(229,231,235,.82); }
+
+      .share-option,
+      .user-item,
+      .user-card{
+        background: rgba(15,23,42,.58);
+        border: 1px solid rgba(148,163,184,.16);
+        color: rgba(229,231,235,.90);
+      }
+      .user-item:hover{ background: rgba(56,189,248,.10); }
+
+      /* Tus notas tienen color pastel inline, dejamos texto oscuro para que se lea */
+      .note-title{ color: rgba(15,23,42,.90); }
+      .note-content{ color: rgba(15,23,42,.80); }
+      .note-footer{ color: rgba(15,23,42,.70); }
+
+      body > div[style*="By Pablo Ojeda"]{
+        color: rgba(229,231,235,.55) !important;
+      }
+    }
+
+    /* =====================================================================
+       FIX FINAL (DEBE SER LO ÚLTIMO): el cuadro del logo NO debe quedar verde
+       ===================================================================== */
+    @media (prefers-color-scheme: dark) {
+      .sidebar .logo{
+        background:
+          radial-gradient(700px 160px at 18% 0%, rgba(56,189,248,.20), transparent 60%),
+          radial-gradient(700px 160px at 82% 0%, rgba(167,139,250,.18), transparent 60%),
+          linear-gradient(180deg, rgba(15,23,42,.92) 0%, rgba(15,23,42,.72) 100%) !important;
+        border-bottom: 1px solid rgba(148,163,184,.16) !important;
+        color: rgba(229,231,235,.96) !important;
+      }
+
+      .sidebar .logo::after{
+        background: radial-gradient(600px 120px at 50% 0%, rgba(255,255,255,.10), transparent 60%) !important;
+      }
+
+      .sidebar .logo img{
+        filter: grayscale(1) brightness(2.1) contrast(1.05)
+                drop-shadow(0 10px 18px rgba(0,0,0,.45)) !important;
+        opacity: .95 !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="logo">
+        <img src="https://raw.githubusercontent.com/jpojedawork-ai/Desarrollos/main/Logo%20Control%20Interno.png" alt="Logo Control Interno" />
+        <h1>Genium</h1>
+      </div>
+
+      <div class="tools">
+        <div class="tool-group">
+          <h3>Acciones Rápidas</h3>
+          <button class="tool-btn active" id="add-note-btn">
+            <i class="fas fa-plus-circle"></i> <span>Agregar Nota</span>
+          </button>
+          <button class="tool-btn" id="new-board-btn-sidebar">
+            <i class="fas fa-plus-square"></i> <span>Nueva Pizarra</span>
+          </button>
+        </div>
+
+        <div class="tool-group">
+          <h3>Colores</h3>
+          <div class="color-palette">
+            <div class="color-option active" style="background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);" data-color="#bbf7d0"></div>
+            <div class="color-option" style="background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);" data-color="#bfdbfe"></div>
+            <div class="color-option" style="background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);" data-color="#fef08a"></div>
+            <div class="color-option" style="background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);" data-color="#fecaca"></div>
+            <div class="color-option" style="background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);" data-color="#ddd6fe"></div>
+            <div class="color-option" style="background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%);" data-color="#bae6fd"></div>
+            <div class="color-option" style="background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);" data-color="#a7f3d0"></div>
+            <div class="color-option" style="background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);" data-color="#fef9c3"></div>
+          </div>
+        </div>
+
+        <div class="import-export">
+          <h3>Gestionar</h3>
+          <div class="import-export-actions">
+            <button class="tool-btn" id="import-btn">
+              <i class="fas fa-file-import"></i> <span>Importar</span>
+            </button>
+            <button class="tool-btn" id="export-btn">
+              <i class="fas fa-file-export"></i> <span>Exportar</span>
+            </button>
+            <button class="tool-btn" id="share-btn-sidebar">
+              <i class="fas fa-share-alt"></i> <span>Compartir</span>
+            </button>
+            <input type="file" id="file-input" class="file-input" accept=".json" />
+          </div>
+        </div>
+      </div>
+
+      <div class="user-section" id="user-section">
+        <div class="user-avatar" id="current-user-avatar">TU</div>
+        <div>
+          <div class="user-name" id="current-user-name">Gestionar Usuarios</div>
+          <div class="user-status">Haz clic para administrar</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="top-bar">
+        <button class="menu-toggle" id="menu-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="board-info">
+          <h2 id="current-board-name">Sin pizarra activa</h2>
+          <button class="edit-board-name" id="edit-board-name" title="Editar nombre">
+            <i class="fas fa-edit"></i>
+          </button>
+        </div>
+        <div class="board-actions">
+          <button class="action-btn secondary-btn" id="share-btn">
+            <i class="fas fa-share-alt"></i> <span>Compartir</span>
+          </button>
+          <button class="action-btn primary-btn" id="save-btn">
+            <i class="fas fa-save"></i> <span>Guardar</span>
+          </button>
+          <button class="action-btn primary-btn" id="new-board-btn">
+            <i class="fas fa-plus"></i> <span>Nueva Pizarra</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs-container" id="tabs-container" style="display:none;">
+        <div class="tabs" id="tabs"></div>
+        <button class="add-tab" id="add-tab-btn" title="Nueva pizarra">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <div class="board-container">
+        <div class="board" id="board">
+          <div class="empty-state" id="empty-state">
+            <i class="fas fa-lightbulb"></i>
+            <h3>¡Bienvenido a Genium!</h3>
+            <p>Crea tu primera pizarra para comenzar a capturar y organizar tus ideas de forma visual.</p>
+            <button class="action-btn primary-btn" id="empty-add-btn">
+              <i class="fas fa-plus"></i> Crear primera pizarra
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal" id="note-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="note-modal-title">Agregar Nueva Idea</h3>
+        <button class="note-action" id="close-modal" style="color:white;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="note-title">Título (opcional)</label>
+          <input type="text" id="note-title" class="form-control" placeholder="Título de la idea" />
+        </div>
+        <div class="form-group">
+          <label for="note-content">Contenido</label>
+          <textarea id="note-content" class="form-control" rows="4" placeholder="Describe tu idea..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <div class="color-palette">
+            <div class="color-option active" style="background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);" data-color="#bbf7d0"></div>
+            <div class="color-option" style="background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);" data-color="#bfdbfe"></div>
+            <div class="color-option" style="background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);" data-color="#fef08a"></div>
+            <div class="color-option" style="background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);" data-color="#fecaca"></div>
+            <div class="color-option" style="background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%);" data-color="#ddd6fe"></div>
+            <div class="color-option" style="background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%);" data-color="#bae6fd"></div>
+            <div class="color-option" style="background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);" data-color="#a7f3d0"></div>
+            <div class="color-option" style="background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);" data-color="#fef9c3"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn secondary-btn" id="cancel-note">Cancelar</button>
+        <button class="action-btn primary-btn" id="save-note">Agregar Idea</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="board-name-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="board-modal-title">Nombre de la Pizarra</h3>
+        <button class="note-action" id="close-board-modal" style="color:white;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="board-name">Ingresa un nombre para tu pizarra</label>
+          <input type="text" id="board-name" class="form-control" placeholder="Ej: Gestión de Riesgos y Controles" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn secondary-btn" id="cancel-board">Cancelar</button>
+        <button class="action-btn primary-btn" id="save-board-name">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="share-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Compartir Pizarrón</h3>
+        <button class="note-action" id="close-share-modal" style="color:white;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Selecciona cómo quieres compartir tu pizarrón:</p>
+        <div class="share-options">
+          <div class="share-option email" id="share-email">
+            <i class="fas fa-envelope"></i><span>Correo</span>
+          </div>
+          <div class="share-option whatsapp" id="share-whatsapp">
+            <i class="fab fa-whatsapp"></i><span>WhatsApp</span>
+          </div>
+          <div class="share-option pdf" id="share-pdf">
+            <i class="fas fa-file-pdf"></i><span>PDF</span>
+          </div>
+          <div class="share-option image" id="share-image">
+            <i class="fas fa-image"></i><span>Imagen</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="user-selection-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Seleccionar Usuario</h3>
+        <button class="note-action" id="close-user-selection-modal" style="color:white;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Selecciona el usuario al que quieres enviar:</p>
+        <div class="user-list" id="user-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn secondary-btn" id="cancel-user-selection">Cancelar</button>
+        <button class="action-btn primary-btn" id="confirm-user-selection">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="user-management-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Gestión de Usuarios</h3>
+        <button class="note-action" id="close-user-management-modal" style="color:white;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <button class="action-btn primary-btn" id="add-user-btn">
+            <i class="fas fa-user-plus"></i> Agregar Usuario
+          </button>
+        </div>
+        <div class="users-container" id="users-container"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn secondary-btn" id="close-user-management">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="add-user-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="add-user-modal-title">Agregar Usuario</h3>
+        <button class="note-action" id="close-add-user-modal" style="color:white;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="user-name">Nombre</label>
+          <input type="text" id="user-name" class="form-control" placeholder="Nombre completo" />
+        </div>
+        <div class="form-group">
+          <label for="user-position">Puesto</label>
+          <input type="text" id="user-position" class="form-control" placeholder="Puesto en la empresa" />
+        </div>
+        <div class="form-group">
+          <label for="user-role">Rol</label>
+          <select id="user-role" class="form-control">
+            <option value="Lider de Proyecto">Líder de Proyecto</option>
+            <option value="Team">Team</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="user-email">Correo Electrónico</label>
+          <input type="email" id="user-email" class="form-control" placeholder="correo@empresa.com" />
+        </div>
+        <div class="form-group">
+          <label for="user-phone">Celular</label>
+          <input type="tel" id="user-phone" class="form-control" placeholder="+1 234 567 8900" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="action-btn secondary-btn" id="cancel-add-user">Cancelar</button>
+        <button class="action-btn primary-btn" id="save-user">Guardar Usuario</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toast-message">Operación completada</span>
+  </div>
+
+  <script>
+    // DOM Elements
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    const menuToggle = document.getElementById('menu-toggle');
+    const addNoteBtn = document.getElementById('add-note-btn');
+    const emptyAddBtn = document.getElementById('empty-add-btn');
+    const noteModal = document.getElementById('note-modal');
+    const shareModal = document.getElementById('share-modal');
+    const boardNameModal = document.getElementById('board-name-modal');
+    const userSelectionModal = document.getElementById('user-selection-modal');
+    const userManagementModal = document.getElementById('user-management-modal');
+    const addUserModal = document.getElementById('add-user-modal');
+    const closeModal = document.getElementById('close-modal');
+    const closeShareModal = document.getElementById('close-share-modal');
+    const closeBoardModal = document.getElementById('close-board-modal');
+    const closeUserSelectionModal = document.getElementById('close-user-selection-modal');
+    const closeUserManagementModal = document.getElementById('close-user-management-modal');
+    const closeAddUserModal = document.getElementById('close-add-user-modal');
+    const cancelNote = document.getElementById('cancel-note');
+    const saveNote = document.getElementById('save-note');
+    const board = document.getElementById('board');
+    const emptyState = document.getElementById('empty-state');
+    const colorOptions = document.querySelectorAll('.color-option');
+    const shareBtn = document.getElementById('share-btn');
+    const shareBtnSidebar = document.getElementById('share-btn-sidebar');
+    const saveBtn = document.getElementById('save-btn');
+    const newBoardBtn = document.getElementById('new-board-btn');
+    const newBoardBtnSidebar = document.getElementById('new-board-btn-sidebar');
+    const addTabBtn = document.getElementById('add-tab-btn');
+    const importBtn = document.getElementById('import-btn');
+    const exportBtn = document.getElementById('export-btn');
+    const fileInput = document.getElementById('file-input');
+    const shareEmail = document.getElementById('share-email');
+    const shareWhatsapp = document.getElementById('share-whatsapp');
+    const sharePdf = document.getElementById('share-pdf');
+    const shareImage = document.getElementById('share-image');
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    const tabsContainer = document.getElementById('tabs-container');
+    const tabs = document.getElementById('tabs');
+    const currentBoardName = document.getElementById('current-board-name');
+    const editBoardName = document.getElementById('edit-board-name');
+    const boardNameInput = document.getElementById('board-name');
+    const cancelBoard = document.getElementById('cancel-board');
+    const saveBoardName = document.getElementById('save-board-name');
+    const noteModalTitle = document.getElementById('note-modal-title');
+    const boardModalTitle = document.getElementById('board-modal-title');
+    const userSection = document.getElementById('user-section');
+    const currentUserAvatar = document.getElementById('current-user-avatar');
+    const currentUserName = document.getElementById('current-user-name');
+    const userList = document.getElementById('user-list');
+    const cancelUserSelection = document.getElementById('cancel-user-selection');
+    const confirmUserSelection = document.getElementById('confirm-user-selection');
+    const usersContainer = document.getElementById('users-container');
+    const addUserBtn = document.getElementById('add-user-btn');
+    const closeUserManagement = document.getElementById('close-user-management');
+    const userNameInput = document.getElementById('user-name');
+    const userPositionInput = document.getElementById('user-position');
+    const userRoleInput = document.getElementById('user-role');
+    const userEmailInput = document.getElementById('user-email');
+    const userPhoneInput = document.getElementById('user-phone');
+    const cancelAddUser = document.getElementById('cancel-add-user');
+    const saveUser = document.getElementById('save-user');
+    const addUserModalTitle = document.getElementById('add-user-modal-title');
+
+    // State
+    let boards = {};
+    let currentBoardId = null;
+    let nextBoardId = 1;
+    let selectedColor = '#bbf7d0';
+    let isEditingNote = false;
+    let editingNoteId = null;
+    let isEditingBoard = false;
+    let users = [];
+    let nextUserId = 1;
+    let selectedUserForSharing = null;
+    let currentSharingMethod = null;
+    let editingUserId = null;
+
+    function init() {
+      loadFromLocalStorage();
+      setupEventListeners();
+      updateUI();
+      if (isMobileDevice()) document.body.classList.add('mobile-device');
+    }
+
+    function isMobileDevice() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        window.innerWidth <= 768;
+    }
+
+    function setupEventListeners() {
+      menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('open');
+      });
+
+      sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('open');
+      });
+
+      addNoteBtn.addEventListener('click', () => {
+        if (!currentBoardId) { showToast('Primero crea una pizarra', 'error'); return; }
+        openNoteModal();
+        closeSidebarOnMobile();
+      });
+
+      emptyAddBtn.addEventListener('click', () => openBoardNameModal());
+
+      closeModal.addEventListener('click', () => { noteModal.style.display = 'none'; resetNoteModal(); });
+      closeShareModal.addEventListener('click', () => { shareModal.style.display = 'none'; });
+      closeBoardModal.addEventListener('click', () => { boardNameModal.style.display = 'none'; resetBoardModal(); });
+      closeUserSelectionModal.addEventListener('click', () => { userSelectionModal.style.display = 'none'; });
+      closeUserManagementModal.addEventListener('click', () => { userManagementModal.style.display = 'none'; });
+      closeAddUserModal.addEventListener('click', () => { addUserModal.style.display = 'none'; resetUserModal(); });
+
+      cancelNote.addEventListener('click', () => { noteModal.style.display = 'none'; resetNoteModal(); });
+      cancelBoard.addEventListener('click', () => { boardNameModal.style.display = 'none'; resetBoardModal(); });
+      cancelUserSelection.addEventListener('click', () => { userSelectionModal.style.display = 'none'; });
+      cancelAddUser.addEventListener('click', () => { addUserModal.style.display = 'none'; resetUserModal(); });
+      closeUserManagement.addEventListener('click', () => { userManagementModal.style.display = 'none'; });
+
+      saveNote.addEventListener('click', createNoteFromModal);
+
+      colorOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+          const parent = e.target.closest('.color-palette');
+          parent.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
+          e.target.classList.add('active');
+          selectedColor = e.target.getAttribute('data-color');
+        });
+      });
+
+      shareBtn.addEventListener('click', () => {
+        if (!currentBoardId) { showToast('Primero crea una pizarra', 'error'); return; }
+        shareModal.style.display = 'flex';
+        closeSidebarOnMobile();
+      });
+
+      shareBtnSidebar.addEventListener('click', () => {
+        if (!currentBoardId) { showToast('Primero crea una pizarra', 'error'); return; }
+        shareModal.style.display = 'flex';
+        closeSidebarOnMobile();
+      });
+
+      saveBtn.addEventListener('click', saveCurrentBoard);
+
+      newBoardBtn.addEventListener('click', () => { openBoardNameModal(); closeSidebarOnMobile(); });
+      newBoardBtnSidebar.addEventListener('click', () => { openBoardNameModal(); closeSidebarOnMobile(); });
+
+      addTabBtn.addEventListener('click', () => openBoardNameModal());
+
+      editBoardName.addEventListener('click', () => {
+        if (!currentBoardId) { showToast('Primero crea una pizarra', 'error'); return; }
+        openBoardNameModal(true);
+      });
+
+      saveBoardName.addEventListener('click', () => {
+        const name = boardNameInput.value.trim();
+        if (!name) { showToast('Por favor ingresa un nombre para la pizarra', 'error'); return; }
+
+        if (isEditingBoard) {
+          boards[currentBoardId].name = name;
+          currentBoardName.textContent = name;
+          const tab = document.querySelector(`.tab[data-board-id="${currentBoardId}"]`);
+          if (tab) tab.querySelector('.tab-name').textContent = name;
+          showToast('Nombre actualizado', 'success');
+        } else {
+          createNewBoard(name);
+        }
+
+        boardNameModal.style.display = 'none';
+        resetBoardModal();
+      });
+
+      importBtn.addEventListener('click', () => { fileInput.click(); closeSidebarOnMobile(); });
+      fileInput.addEventListener('change', importBoard);
+      exportBtn.addEventListener('click', exportCurrentBoard);
+
+      shareEmail.addEventListener('click', () => { currentSharingMethod = 'email'; openUserSelectionModal(); });
+      shareWhatsapp.addEventListener('click', () => { currentSharingMethod = 'whatsapp'; openUserSelectionModal(); });
+      sharePdf.addEventListener('click', shareAsPdf);
+      shareImage.addEventListener('click', shareAsImage);
+
+      confirmUserSelection.addEventListener('click', () => {
+        if (!selectedUserForSharing) { showToast('Por favor selecciona un usuario', 'error'); return; }
+        if (currentSharingMethod === 'email') shareViaEmail(selectedUserForSharing);
+        if (currentSharingMethod === 'whatsapp') shareViaWhatsApp(selectedUserForSharing);
+        userSelectionModal.style.display = 'none';
+        selectedUserForSharing = null;
+        currentSharingMethod = null;
+      });
+
+      userSection.addEventListener('click', () => { openUserManagementModal(); closeSidebarOnMobile(); });
+      addUserBtn.addEventListener('click', () => openAddUserModal());
+      saveUser.addEventListener('click', saveUserFromModal);
+
+      window.addEventListener('click', (e) => {
+        if (e.target === noteModal) { noteModal.style.display = 'none'; resetNoteModal(); }
+        if (e.target === shareModal) { shareModal.style.display = 'none'; }
+        if (e.target === boardNameModal) { boardNameModal.style.display = 'none'; resetBoardModal(); }
+        if (e.target === userSelectionModal) { userSelectionModal.style.display = 'none'; }
+        if (e.target === userManagementModal) { userManagementModal.style.display = 'none'; }
+        if (e.target === addUserModal) { addUserModal.style.display = 'none'; resetUserModal(); }
+      });
+    }
+
+    function closeSidebarOnMobile() {
+      if (isMobileDevice()) {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('open');
+      }
+    }
+
+    function openBoardNameModal(editing = false) {
+      isEditingBoard = editing;
+      if (editing) {
+        boardModalTitle.textContent = 'Editar Nombre de Pizarra';
+        boardNameInput.value = boards[currentBoardId].name;
+      } else {
+        boardModalTitle.textContent = 'Nueva Pizarra';
+        boardNameInput.value = '';
+      }
+      boardNameModal.style.display = 'flex';
+      closeSidebarOnMobile();
+    }
+
+    function resetBoardModal() {
+      isEditingBoard = false;
+      boardNameInput.value = '';
+    }
+
+    function openUserSelectionModal() {
+      if (users.length === 0) {
+        showToast('No hay usuarios registrados. Agrega usuarios primero.', 'error');
+        shareModal.style.display = 'none';
+        return;
+      }
+
+      userList.innerHTML = '';
+      users.forEach(user => {
+        const userItem = document.createElement('div');
+        userItem.className = 'user-item';
+        userItem.setAttribute('data-user-id', user.id);
+        userItem.innerHTML = `
+          <div class="user-item-avatar">${getInitials(user.name)}</div>
+          <div class="user-item-info">
+            <div class="user-item-name">${user.name}</div>
+            <div class="user-item-role">${user.role} - ${user.position}</div>
+          </div>
+        `;
+        userItem.addEventListener('click', () => {
+          document.querySelectorAll('.user-item').forEach(item => item.classList.remove('selected'));
+          userItem.classList.add('selected');
+          selectedUserForSharing = user;
+        });
+        userList.appendChild(userItem);
+      });
+
+      userSelectionModal.style.display = 'flex';
+    }
+
+    function openUserManagementModal() {
+      renderUsers();
+      userManagementModal.style.display = 'flex';
+    }
+
+    function openAddUserModal(editing = false, userId = null) {
+      editingUserId = userId;
+      if (editing && userId) {
+        const user = users.find(u => u.id === userId);
+        if (user) {
+          addUserModalTitle.textContent = 'Editar Usuario';
+          userNameInput.value = user.name;
+          userPositionInput.value = user.position;
+          userRoleInput.value = user.role;
+          userEmailInput.value = user.email;
+          userPhoneInput.value = user.phone;
+        }
+      } else {
+        addUserModalTitle.textContent = 'Agregar Usuario';
+        resetUserModal();
+      }
+      addUserModal.style.display = 'flex';
+    }
+
+    function resetUserModal() {
+      userNameInput.value = '';
+      userPositionInput.value = '';
+      userRoleInput.value = 'Lider de Proyecto';
+      userEmailInput.value = '';
+      userPhoneInput.value = '';
+      editingUserId = null;
+    }
+
+    function renderUsers() {
+      usersContainer.innerHTML = '';
+      if (users.length === 0) {
+        usersContainer.innerHTML = '<p style="text-align:center; color:var(--gray); padding:20px;">No hay usuarios registrados</p>';
+        return;
+      }
+
+      users.forEach(user => {
+        const userCard = document.createElement('div');
+        userCard.className = 'user-card';
+        userCard.innerHTML = `
+          <div class="user-card-avatar">
+            <div class="user-item-avatar">${getInitials(user.name)}</div>
+          </div>
+          <div class="user-card-info">
+            <div class="user-card-name">${user.name}</div>
+            <div class="user-card-details">
+              <div>${user.position} - ${user.role}</div>
+              <div>${user.email} | ${user.phone}</div>
+            </div>
+          </div>
+          <div class="user-card-actions">
+            <button class="user-action edit-user" data-user-id="${user.id}" title="Editar"><i class="fas fa-edit"></i></button>
+            <button class="user-action delete delete-user" data-user-id="${user.id}" title="Eliminar"><i class="fas fa-trash"></i></button>
+          </div>
+        `;
+        usersContainer.appendChild(userCard);
+      });
+
+      document.querySelectorAll('.edit-user').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const userId = parseInt(e.currentTarget.getAttribute('data-user-id'));
+          openAddUserModal(true, userId);
+        });
+      });
+
+      document.querySelectorAll('.delete-user').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const userId = parseInt(e.currentTarget.getAttribute('data-user-id'));
+          deleteUser(userId);
+        });
+      });
+    }
+
+    function getInitials(name) {
+      return name.split(' ').map(part => part[0]).join('').toUpperCase().substring(0, 2);
+    }
+
+    function saveUserFromModal() {
+      const name = userNameInput.value.trim();
+      const position = userPositionInput.value.trim();
+      const role = userRoleInput.value;
+      const email = userEmailInput.value.trim();
+      const phone = userPhoneInput.value.trim();
+
+      if (!name || !position || !email || !phone) {
+        showToast('Por favor completa todos los campos', 'error');
+        return;
+      }
+
+      if (editingUserId) {
+        const idx = users.findIndex(u => u.id === editingUserId);
+        if (idx !== -1) {
+          users[idx] = { ...users[idx], name, position, role, email, phone };
+          showToast('Usuario actualizado', 'success');
+        }
+      } else {
+        users.push({ id: nextUserId++, name, position, role, email, phone });
+        showToast('Usuario agregado', 'success');
+      }
+
+      addUserModal.style.display = 'none';
+      resetUserModal();
+      renderUsers();
+      saveToLocalStorage();
+    }
+
+    function deleteUser(userId) {
+      if (confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
+        users = users.filter(u => u.id !== userId);
+        renderUsers();
+        saveToLocalStorage();
+        showToast('Usuario eliminado', 'success');
+      }
+    }
+
+    function createNewBoard(name) {
+      const boardId = `board-${nextBoardId++}`;
+      boards[boardId] = { id: boardId, name, notes: [], nextNoteId: 1 };
+      createTab(boardId, name);
+      switchToBoard(boardId);
+      saveToLocalStorage();
+      showToast(`Pizarra "${name}" creada`, 'success');
+      return boardId;
+    }
+
+    function createTab(boardId, name) {
+      const tab = document.createElement('div');
+      tab.className = 'tab';
+      tab.setAttribute('data-board-id', boardId);
+      tab.innerHTML = `<span class="tab-name">${name}</span><button class="tab-close"><i class="fas fa-times"></i></button>`;
+
+      tab.addEventListener('click', (e) => {
+        if (!e.target.closest('.tab-close')) {
+          switchToBoard(boardId);
+          closeSidebarOnMobile();
+        }
+      });
+
+      tab.querySelector('.tab-close').addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeBoard(boardId);
+      });
+
+      tabs.appendChild(tab);
+      return tab;
+    }
+
+    function switchToBoard(boardId) {
+      currentBoardId = boardId;
+      currentBoardName.textContent = boards[boardId].name;
+
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.toggle('active', tab.getAttribute('data-board-id') === boardId);
+      });
+
+      renderNotes();
+      updateUI();
+    }
+
+    function closeBoard(boardId) {
+      if (Object.keys(boards).length === 1) {
+        if (!confirm('¿Estás seguro de que quieres cerrar la única pizarra? Se perderán los cambios no guardados.')) return;
+      } else {
+        if (!confirm('¿Estás seguro de que quieres cerrar esta pizarra? Se perderán los cambios no guardados.')) return;
+      }
+
+      delete boards[boardId];
+
+      const tab = document.querySelector(`.tab[data-board-id="${boardId}"]`);
+      if (tab) tab.remove();
+
+      const remaining = Object.keys(boards);
+      if (remaining.length > 0) {
+        switchToBoard(remaining[0]);
+      } else {
+        currentBoardId = null;
+        currentBoardName.textContent = 'Sin pizarra activa';
+        renderNotes();
+        updateUI();
+      }
+
+      saveToLocalStorage();
+      showToast('Pizarra cerrada', 'success');
+    }
+
+    function updateUI() {
+      const hasBoards = Object.keys(boards).length > 0;
+      tabsContainer.style.display = hasBoards ? 'flex' : 'none';
+
+      const emptyStateEl = document.getElementById('empty-state');
+      if (emptyStateEl) {
+        if (hasBoards) {
+          emptyStateEl.querySelector('h3').textContent = 'Comienza tu lluvia de ideas';
+          emptyStateEl.querySelector('p').textContent = 'Tu pizarrón está vacío. Haz clic en "Agregar Nota" para comenzar a capturar tus ideas.';
+          emptyStateEl.querySelector('button').innerHTML = '<i class="fas fa-plus"></i> Agregar primera idea';
+        } else {
+          emptyStateEl.querySelector('h3').textContent = '¡Bienvenido a Genium!';
+          emptyStateEl.querySelector('p').textContent = 'Crea tu primera pizarra para comenzar a capturar y organizar tus ideas de forma visual.';
+          emptyStateEl.querySelector('button').innerHTML = '<i class="fas fa-plus"></i> Crear primera pizarra';
+        }
+      }
+
+      const hasCurrentBoard = currentBoardId !== null;
+      addNoteBtn.disabled = !hasCurrentBoard;
+      editBoardName.style.display = hasCurrentBoard ? 'block' : 'none';
+    }
+
+    function renderNotes() {
+      if (!currentBoardId) {
+        board.innerHTML = '';
+        const emptyClone = emptyState.cloneNode(true);
+        emptyClone.id = 'empty-state';
+        emptyClone.querySelector('button').addEventListener('click', openBoardNameModal);
+        board.appendChild(emptyClone);
+        return;
+      }
+
+      board.innerHTML = '';
+      const data = boards[currentBoardId];
+
+      if (data.notes.length === 0) {
+        const emptyClone = emptyState.cloneNode(true);
+        emptyClone.id = 'empty-state';
+        emptyClone.querySelector('button').addEventListener('click', openNoteModal);
+        board.appendChild(emptyClone);
+      } else {
+        data.notes.forEach(note => createNoteElement(note));
+      }
+    }
+
+    function openNoteModal(noteId = null) {
+      if (!currentBoardId) return;
+
+      if (noteId) {
+        const note = boards[currentBoardId].notes.find(n => n.id === noteId);
+        if (note) {
+          document.getElementById('note-title').value = note.title || '';
+          document.getElementById('note-content').value = note.content;
+
+          const modalColors = document.querySelectorAll('#note-modal .color-option');
+          modalColors.forEach(option => {
+            option.classList.remove('active');
+            if (option.getAttribute('data-color') === note.color) {
+              option.classList.add('active');
+              selectedColor = note.color;
+            }
+          });
+
+          noteModalTitle.textContent = 'Editar Idea';
+          isEditingNote = true;
+          editingNoteId = noteId;
+        }
+      } else {
+        resetNoteModal();
+      }
+
+      noteModal.style.display = 'flex';
+      closeSidebarOnMobile();
+    }
+
+    function resetNoteModal() {
+      document.getElementById('note-title').value = '';
+      document.getElementById('note-content').value = '';
+      noteModalTitle.textContent = 'Agregar Nueva Idea';
+      isEditingNote = false;
+      editingNoteId = null;
+    }
+
+    function createNoteFromModal() {
+      const title = document.getElementById('note-title').value;
+      const content = document.getElementById('note-content').value;
+
+      if (content.trim() === '') {
+        showToast('Por favor, ingresa el contenido de la idea', 'error');
+        return;
+      }
+
+      if (isEditingNote) updateNote(editingNoteId, title, content, selectedColor);
+      else createNote(title, content, selectedColor);
+
+      noteModal.style.display = 'none';
+      resetNoteModal();
+      showToast(`Idea ${isEditingNote ? 'actualizada' : 'agregada'} correctamente`, 'success');
+    }
+
+    function createNote(title, content, color, id = null, x = null, y = null) {
+      if (!currentBoardId) return;
+
+      const data = boards[currentBoardId];
+      const noteId = id || data.nextNoteId++;
+
+      if (data.notes.find(n => n.content === content && n.title === title)) {
+        showToast('Esta idea ya existe en el pizarrón', 'error');
+        return;
+      }
+
+      const left = x || Math.floor(Math.random() * (board.offsetWidth - 250));
+      const top = y || Math.floor(Math.random() * (board.offsetHeight - 200));
+
+      const note = {
+        id: noteId,
+        title: title || 'Nueva idea',
+        content,
+        color,
+        x: left,
+        y: top,
+        createdAt: new Date().toISOString()
+      };
+
+      data.notes.push(note);
+      createNoteElement(note);
+      saveToLocalStorage();
+      updateUI();
+      return noteId;
+    }
+
+    function createNoteElement(note) {
+      const el = document.createElement('div');
+      el.className = 'note';
+      el.style.backgroundColor = note.color;
+      el.style.left = `${note.x}px`;
+      el.style.top = `${note.y}px`;
+      el.setAttribute('data-id', note.id);
+
+      if (isMobileDevice()) {
+        el.style.width = '90%';
+        el.style.maxWidth = '300px';
+      } else {
+        el.style.width = '240px';
+      }
+
+      const created = new Date(note.createdAt);
+      const date = created.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+      el.innerHTML = `
+        <div class="note-header">
+          <div class="note-color" style="background-color: ${getDarkerColor(note.color)};"></div>
+          <div class="note-actions">
+            <button class="note-action view-note" title="Ver detalles"><i class="fas fa-eye"></i></button>
+            <button class="note-action edit-note" title="Editar"><i class="fas fa-edit"></i></button>
+            <button class="note-action delete-note" title="Eliminar"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+        <div class="note-title">${note.title}</div>
+        <div class="note-content">${note.content}</div>
+        <div class="note-footer"><span>Creado: ${date}</span></div>
+      `;
+
+      el.querySelector('.delete-note').addEventListener('click', (e) => { e.stopPropagation(); deleteNote(note.id); });
+      el.querySelector('.edit-note').addEventListener('click', (e) => { e.stopPropagation(); openNoteModal(note.id); });
+
+      const viewBtn = el.querySelector('.view-note');
+      viewBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        el.classList.toggle('expanded');
+        viewBtn.title = el.classList.contains('expanded') ? 'Contraer' : 'Expandir';
+        viewBtn.innerHTML = el.classList.contains('expanded') ? '<i class="fas fa-compress-alt"></i>' : '<i class="fas fa-eye"></i>';
+
+        if (isMobileDevice() && el.classList.contains('expanded')) {
+          el.style.width = '95%';
+          el.style.maxWidth = '350px';
+        } else if (isMobileDevice()) {
+          el.style.width = '90%';
+          el.style.maxWidth = '300px';
+        }
+      });
+
+      makeDraggable(el, note.id);
+
+      const emptyStateEl = document.getElementById('empty-state');
+      if (emptyStateEl) emptyStateEl.remove();
+
+      board.appendChild(el);
+    }
+
+    function updateNote(noteId, title, content, color) {
+      if (!currentBoardId) return;
+
+      const data = boards[currentBoardId];
+      const idx = data.notes.findIndex(n => n.id === noteId);
+      if (idx === -1) return;
+
+      if (data.notes.find((n, i) => i !== idx && n.content === content && n.title === title)) {
+        showToast('Esta idea ya existe en el pizarrón', 'error');
+        return;
+      }
+
+      data.notes[idx].title = title || 'Nueva idea';
+      data.notes[idx].content = content;
+      data.notes[idx].color = color;
+
+      const el = document.querySelector(`.note[data-id="${noteId}"]`);
+      if (el) {
+        el.style.backgroundColor = color;
+        el.querySelector('.note-color').style.backgroundColor = getDarkerColor(color);
+        el.querySelector('.note-title').textContent = title || 'Nueva idea';
+        el.querySelector('.note-content').textContent = content;
+      }
+
+      saveToLocalStorage();
+    }
+
+    function deleteNote(noteId) {
+      if (!currentBoardId) return;
+
+      if (confirm('¿Estás seguro de que quieres eliminar esta idea?')) {
+        const data = boards[currentBoardId];
+        data.notes = data.notes.filter(n => n.id !== noteId);
+
+        const el = document.querySelector(`.note[data-id="${noteId}"]`);
+        if (el) el.remove();
+
+        saveToLocalStorage();
+        updateUI();
+        showToast('Idea eliminada', 'success');
+      }
+    }
+
+    function makeDraggable(element, noteId) {
+      let isDragging = false;
+      let startX, startY, initialX, initialY;
+
+      element.addEventListener('mousedown', startDrag);
+      element.addEventListener('touchstart', startDragTouch, { passive: false });
+
+      function startDrag(e) {
+        if (e.target.closest('.note-action')) return;
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        initialX = element.offsetLeft;
+        initialY = element.offsetTop;
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDrag);
+        element.style.zIndex = '1000';
+        e.preventDefault();
+      }
+
+      function startDragTouch(e) {
+        if (e.target.closest('.note-action')) return;
+        isDragging = true;
+        const t = e.touches[0];
+        startX = t.clientX;
+        startY = t.clientY;
+        initialX = element.offsetLeft;
+        initialY = element.offsetTop;
+        document.addEventListener('touchmove', dragTouch, { passive: false });
+        document.addEventListener('touchend', stopDragTouch);
+        element.style.zIndex = '1000';
+        e.preventDefault();
+      }
+
+      function drag(e) {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        element.style.left = `${initialX + dx}px`;
+        element.style.top = `${initialY + dy}px`;
+      }
+
+      function dragTouch(e) {
+        if (!isDragging) return;
+        const t = e.touches[0];
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        element.style.left = `${initialX + dx}px`;
+        element.style.top = `${initialY + dy}px`;
+        e.preventDefault();
+      }
+
+      function stopDrag() {
+        isDragging = false;
+        document.removeEventListener('mousemove', drag);
+        document.removeEventListener('mouseup', stopDrag);
+        element.style.zIndex = '';
+        updateNotePosition();
+      }
+
+      function stopDragTouch() {
+        isDragging = false;
+        document.removeEventListener('touchmove', dragTouch);
+        document.removeEventListener('touchend', stopDragTouch);
+        element.style.zIndex = '';
+        updateNotePosition();
+      }
+
+      function updateNotePosition() {
+        if (!currentBoardId) return;
+        const data = boards[currentBoardId];
+        const idx = data.notes.findIndex(n => n.id === noteId);
+        if (idx !== -1) {
+          data.notes[idx].x = parseInt(element.style.left);
+          data.notes[idx].y = parseInt(element.style.top);
+          saveToLocalStorage();
+        }
+      }
+    }
+
+    function getDarkerColor(hex) {
+      let r = parseInt(hex.slice(1, 3), 16);
+      let g = parseInt(hex.slice(3, 5), 16);
+      let b = parseInt(hex.slice(5, 7), 16);
+      r = Math.floor(r * 0.7);
+      g = Math.floor(g * 0.7);
+      b = Math.floor(b * 0.7);
+      return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+    }
+
+    function saveCurrentBoard() {
+      if (!currentBoardId) { showToast('Primero crea una pizarra', 'error'); return; }
+      saveToLocalStorage();
+      showToast('Pizarrón guardado correctamente', 'success');
+    }
+
+async function exportCurrentBoard() {
+  if (!currentBoardId || boards[currentBoardId].notes.length === 0) {
+    showToast('No hay ideas para exportar', 'error');
+    return;
+  }
+
+  const today = new Date();
+  const formattedDate =
+    `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  // Nombre EXACTO solicitado:
+  const fileName = `Genius_respaldo_(${formattedDate}).json`;
+
+  const dataStr = JSON.stringify(
+    {
+      board: boards[currentBoardId],
+      exportDate: new Date().toISOString()
+    },
+    null,
+    2
+  );
+
+  // ✅ Chrome/Edge: pregunta dónde guardar (Guardar como...)
+  if (window.showSaveFilePicker) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: fileName,
+        types: [
+          {
+            description: 'Archivo JSON',
+            accept: { 'application/json': ['.json'] }
+          }
+        ]
+      });
+
+      const writable = await handle.createWritable();
+      await writable.write(dataStr);
+      await writable.close();
+
+      showToast('Respaldo guardado correctamente', 'success');
+    } catch (err) {
+      // Usuario canceló el diálogo
+      if (err && err.name === 'AbortError') return;
+      console.error(err);
+      showToast('No se pudo guardar el respaldo', 'error');
+    }
+    return;
+  }
+
+  // 🔁 Fallback: descarga normal (la ubicación depende del navegador)
+  const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+
+  showToast('Respaldo descargado correctamente', 'success');
+}
+
+    function importBoard(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!data.board) { showToast('El archivo no contiene datos válidos de pizarra', 'error'); return; }
+
+          const existingNames = Object.values(boards).map(b => b.name);
+          if (existingNames.includes(data.board.name)) {
+            showToast('Ya existe una pizarra con ese nombre', 'error');
+            return;
+          }
+
+          const boardId = createNewBoard(data.board.name || 'Pizarra Importada');
+          const boardData = boards[boardId];
+
+          if (Array.isArray(data.board.notes)) {
+            data.board.notes.forEach(n => createNote(n.title, n.content, n.color, n.id, n.x, n.y));
+          }
+          if (data.board.nextNoteId) boardData.nextNoteId = data.board.nextNoteId;
+
+          showToast('Pizarrón importado correctamente', 'success');
+        } catch (err) {
+          showToast('Error al importar el archivo. Verifica que sea un archivo JSON válido.', 'error');
+          console.error('Import error:', err);
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function loadFromLocalStorage() {
+      const saved = localStorage.getItem('geniumData');
+      if (!saved) return;
+
+      try {
+        const data = JSON.parse(saved);
+        boards = data.boards || {};
+        nextBoardId = data.nextBoardId || 1;
+        users = data.users || [];
+        nextUserId = data.nextUserId || 1;
+
+        Object.values(boards).forEach(b => createTab(b.id, b.name));
+        const ids = Object.keys(boards);
+        if (ids.length > 0) switchToBoard(ids[0]);
+      } catch (err) {
+        console.error('Error loading from localStorage:', err);
+      }
+    }
+
+    function saveToLocalStorage() {
+      const data = { boards, nextBoardId, users, nextUserId, lastSaved: new Date().toISOString() };
+      localStorage.setItem('geniumData', JSON.stringify(data));
+    }
+
+    function shareViaEmail(user) {
+      if (!currentBoardId || boards[currentBoardId].notes.length === 0) { showToast('No hay ideas para compartir', 'error'); return; }
+      const boardData = boards[currentBoardId];
+      const subject = `Pizarrón Genium: ${boardData.name}`;
+      let body = `Hola ${user.name},\n\nTe comparto mi pizarrón de lluvia de ideas: ${boardData.name}\n\n`;
+      boardData.notes.forEach((note, i) => { body += `${i+1}. ${note.title}\n   ${note.content}\n\n`; });
+      body += `\n--\nCreado con Genium`;
+      window.open(`mailto:${user.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+      shareModal.style.display = 'none';
+    }
+
+    function shareViaWhatsApp(user) {
+      if (!currentBoardId || boards[currentBoardId].notes.length === 0) { showToast('No hay ideas para compartir', 'error'); return; }
+      const boardData = boards[currentBoardId];
+      let text = `Hola ${user.name},\n\n*${boardData.name}*\n\n`;
+      boardData.notes.forEach((note, i) => { text += `*${i+1}. ${note.title}*\n${note.content}\n\n`; });
+      text += `_Creado con Genium_`;
+      const phone = user.phone.replace(/\D/g, '');
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`);
+      shareModal.style.display = 'none';
+    }
+
+    function shareAsPdf() {
+      if (!currentBoardId || boards[currentBoardId].notes.length === 0) { showToast('No hay ideas para compartir', 'error'); return; }
+      html2canvas(board).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgWidth = 210;
+        const pageHeight = 295;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+
+        pdf.save(`Genius-${boards[currentBoardId].name}.pdf`);
+        showToast('PDF generado correctamente', 'success');
+      });
+      shareModal.style.display = 'none';
+    }
+
+    function shareAsImage() {
+      if (!currentBoardId || boards[currentBoardId].notes.length === 0) { showToast('No hay ideas para compartir', 'error'); return; }
+      html2canvas(board).then(canvas => {
+        const image = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = `Genius-${boards[currentBoardId].name}.png`;
+        link.href = image;
+        link.click();
+        showToast('Imagen guardada correctamente', 'success');
+      });
+      shareModal.style.display = 'none';
+    }
+
+    function showToast(message, type = 'success') {
+      toastMessage.textContent = message;
+      toast.className = 'toast';
+      toast.classList.add(type);
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    init();
+  </script>
+
+  <div style="text-align:center; font-size:0.85rem; color:#666; position:fixed; bottom:10px; width:100%; z-index:101;">
+    By Pablo Ojeda
+  </div>
+</body>
+</html>
